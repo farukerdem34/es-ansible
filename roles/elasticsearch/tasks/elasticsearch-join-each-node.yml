@@ -1,0 +1,33 @@
+- name: Join worker node to Elasticsearch cluster
+  hosts: elasticsearch_nodes
+  become: true
+  gather_facts: false
+  vars:
+    es_bin_dir: "/usr/share/elasticsearch/bin"
+  tasks:
+    - name: Generate token from master for this node
+      args:
+        chdir: "{{ es_bin_dir }}" 
+      delegate_to: "{{ groups['elasticsearch_master'][0] }}"
+      command: ./elasticsearch-create-enrollment-token -s node
+      register: enrollment_token
+      
+    - name: Show token (debug)
+      debug:
+        var: enrollment_token.stdout
+
+    - name: Stop Elasticsearch
+      systemd:
+        name: elasticsearch
+        state: stopped
+
+    - name: Join this node to cluster with token
+      args:
+        chdir: "{{ es_bin_dir }}" 
+      command: printf "y\n" | ./elasticsearch-reconfigure-node --enrollment-token {{ enrollment_token.stdout }}
+
+    - name: Start Elasticsearch
+      systemd:
+        name: elasticsearch
+        state: started
+        enabled: true

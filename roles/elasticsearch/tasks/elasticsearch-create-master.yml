@@ -1,0 +1,28 @@
+- name: Setup Elasticsearch master node
+  hosts: elasticsearch_master
+  become: true
+  vars:
+    elastic_password: "elastic"
+    elastic_port: "9200"
+    elastic_host: "localhost"
+  tasks:
+    - name: Reset elastic user password non-interactively
+      become: true
+      ansible.builtin.shell: |
+        printf "{{ elastic_password }}\n{{ elastic_password }}\n" | /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic -s -b -i
+      args:
+        executable: /bin/bash
+    - name: Ensure Elasticsearch is running
+      systemd:
+        name: elasticsearch
+        state: started
+        enabled: true
+
+    - name: Wait for Elasticsearch to start with HTTPS (skip SSL verification)
+      uri:
+        url: "https://{{ elastic_host }}:{{ elastic_port }}"
+        method: GET
+        status_code: 200
+        validate_certs: false
+        url_username: elastic
+        url_password: "{{ elastic_password }}"

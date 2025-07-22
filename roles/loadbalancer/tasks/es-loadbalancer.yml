@@ -1,0 +1,25 @@
+- name: Configure Nginx SSL Load Balancer for Elasticsearch
+  hosts: loadbalancer
+  become: true
+  vars:
+    nginx_conf_path: /etc/nginx/conf.d/elasticsearch-loadbalancer.conf
+  tasks:
+    - name: Ensure Nginx is installed
+      apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Deploy Nginx load balancer configuration
+      template:
+        src: nginx-loadbalancer.conf.j2
+        dest: "{{ nginx_conf_path }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reload Nginx to apply new configuration
+      systemd:
+        name: nginx
+        state: reloaded
+        enabled: true

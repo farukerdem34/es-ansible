@@ -1,0 +1,19 @@
+- name: Configure Elasticsearch settings
+  hosts: elasticsearch_master:elasticsearch_nodes
+  become: true
+  vars:
+    network_host: "0.0.0.0"
+    http_port: "9200"
+    cluster_name: "es-cluster"
+  tasks:
+    - name: Set multiple config lines
+      ansible.builtin.lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: "^#?{{ item.key }}:"
+        line: "{{ item.key }}: {{ item.value }}"
+        backrefs: true 
+      loop:
+        - { key: 'cluster.name', value: '{{ cluster_name }}' }
+        - { key: 'node.name', value: '{{ node_name }}' }
+        - { key: 'network.host', value: '{{ network_host }}' }
+        - { key: 'http.port', value: '{{ http_port }}' }

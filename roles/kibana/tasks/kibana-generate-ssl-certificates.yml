@@ -1,0 +1,65 @@
+- name: SSL certificate preparation and distribution for Kibana
+  hosts: elasticsearch_master
+  become: true
+  vars:
+    es_bin_path: "/usr/share/elasticsearch/bin"
+    certs_path: "/etc/elasticsearch/certs"
+    output_path: "/tmp"
+
+  tasks:
+    - name: Show secure password from keystore
+      command: "{{ es_bin_path }}/elasticsearch-keystore show xpack.security.http.ssl.keystore.secure_password"
+      register: keystore_password
+
+    - name: Extract CA private key from p12
+      command: "openssl pkcs12 -in {{ certs_path }}/http.p12 -nocerts -nodes -out {{ certs_path }}/http_ca.key -passin pass:{{ keystore_password.stdout }}"
+
+    - name: Generate PEM certificate for Kibana using its IP
+      command: >
+        {{ es_bin_path }}/elasticsearch-certutil cert --pem
+        --ca-cert {{ certs_path }}/http_ca.crt
+        --ca-key {{ certs_path }}/http_ca.key
+        --ip {{ hostvars[groups['kibana'][0]]['inventory_hostname'] }}
+        --out {{ output_path }}/kibana.zip -s
+- name: Configure Kibana with certificates
+  hosts: kibana
+  become: true
+  vars:
+    output_path: "/tmp"
+  tasks:
+    - name: Copy kibana.zip to host 
+      ansible.builtin.synchronize:
+        src: "{{ output_path }}/kibana.zip"
+        dest: "{{ output_path }}/kibana.zip"
+      delegate_to: "{{ groups['elasticsearch_master'][0] }}"
+
+    - name: Copy http_ca.crt to host 
+      copy:
+        src: "{{ certs_path }}/http_ca.crt"
+        dest: "{{ output_path }}/http_ca.crt"
+      delegate_to: "{{ groups['elasticsearch_master'][0] }}"
+    - name: Ensure /etc/kibana/certs directory exists
+      file:
+        path: /etc/kibana/certs
+        state: directory
+        owner: kibana
+        group: kibana
+        mode: '0755'
+
+    - name: Unzip kibana.zip to /etc/kibana/certs
+      unarchive:
+        src: /tmp/kibana.zip
+        dest: /etc/kibana/certs
+        remote_src: true
+        owner: kibana
+        group: kibana
+
+    - name: Move http_ca.crt to /etc/kibana/certs
+      command: mv /tmp/http_ca.crt /etc/kibana/certs/http_ca.crt
+
+    - name: Set ownership and permissions on http_ca.crt
+      file:
+        path: /etc/kibana/certs/http_ca.crt
+        owner: kibana
+        group: kibana
+        mode: '0774'

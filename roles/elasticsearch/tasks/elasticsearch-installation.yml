@@ -1,0 +1,25 @@
+- name: Install Elasticsearch .deb package
+  hosts: elasticsearch_master:elasticsearch_nodes
+  become: true
+  vars:
+    elasticsearch_deb_url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-9.0.3-amd64.deb"
+    elasticsearch_deb_file: "/tmp/elasticsearch.deb"
+
+  tasks:
+    - name: Ensure dependencies are installed
+      apt:
+        name: wget
+        state: present
+        update_cache: true
+
+    - name: Download Elasticsearch .deb package
+      get_url:
+        url: "{{ elasticsearch_deb_url }}"
+        dest: "{{ elasticsearch_deb_file }}"
+        mode: '0644'
+
+    - name: Install Elasticsearch .deb package
+      apt:
+        deb: "{{ elasticsearch_deb_file }}"
+        state: present
+

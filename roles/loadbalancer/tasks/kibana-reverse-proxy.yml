@@ -1,0 +1,25 @@
+- name: Configure Kibana Reverse-Proxy 
+  hosts: kibana
+  become: true
+  vars:
+    nginx_conf_path: /etc/nginx/conf.d/kibana.conf
+  tasks:
+    - name: Ensure Nginx is installed
+      apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Deploy Nginx Reverse-Proxy
+      template:
+        src: kibana.conf.j2
+        dest: "{{ nginx_conf_path }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reload Nginx to apply new configuration
+      systemd:
+        name: nginx
+        state: reloaded
+        enabled: true

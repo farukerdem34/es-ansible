@@ -1,0 +1,40 @@
+
+- name: Configure Kibana with certificates
+  hosts: kibana
+  become: true
+  vars:
+    output_path: "/tmp"
+    certs_path: "/etc/elasticsearch/certs"
+  tasks:
+    - name: Fetch kibana.zip to control machine
+      fetch:
+        src: "{{ output_path }}/kibana.zip"
+        dest: "/tmp/kibana.zip"
+        flat: true
+      delegate_to: "{{ groups['elasticsearch_master'][0] }}"
+
+    # kontrol sunucusundan kibana'ya kopyala
+    - name: Copy kibana.zip to Kibana host
+      copy:
+        src: "/tmp/kibana.zip"
+        dest: "{{ output_path }}/kibana.zip"
+    - name: Fetch http_ca.crt to control machine
+      fetch:
+        src: "{{ certs_path }}/http_ca.crt"
+        dest: "/tmp/http_ca.crt"
+        flat: true
+      delegate_to: "{{ groups['elasticsearch_master'][0] }}"
+
+    - name: Copy http_ca.crt to Kibana host
+      copy:
+        src: "{{ output_path }}/http_ca.crt"
+        dest: "/etc/kibana/certs/http_ca.crt"
+    - name: Install unzip
+      apt:
+        name: unzip
+        state: present
+    - name: Extract kibana.zip
+      ansible.builtin.unarchive:
+        src: /tmp/kibana.zip
+        dest: /etc/kibana/certs
+        remote_src: true

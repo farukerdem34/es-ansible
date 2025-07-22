@@ -1,0 +1,53 @@
+- name: Install Dotfiles and Configure All
+  hosts: elasticsearch_master:elasticsearch_nodes:kibana
+  become: true
+  vars:
+    dotfiles_repository: "https://github.com/farukerdem34/dotfiles"
+    dotfiles_branch: "master"
+  tasks:
+    - name: Update package repositories
+      apt:
+        update_cache: true
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+        autoremove: true
+
+    - name: Install dependencies
+      apt:
+        name:
+          - git
+          - stow
+          - tmux
+        state: present
+
+    - name: Clone dotfiles repository
+      git:
+        repo: "{{ dotfiles_repository }}"
+        dest: "{{ ansible_env.HOME }}/.dotfiles"
+        version: "{{ dotfiles_branch }}" 
+        update: true
+
+    - name: Backup existing .bashrc (if it exists)
+      shell: rm -f {{ ansible_env.HOME }}/.bashrc
+      args:
+        removes: "{{ ansible_env.HOME }}/.bashrc.bak"
+      ignore_errors: true
+
+    - name: Stow dotfiles
+      args:
+        chdir: "{{ ansible_env.HOME }}/.dotfiles"
+      command: stow bash tmux zsh starship vimrc --adopt
+
+    - name: Clone TPM (Tmux Plugin Manager)
+      git:
+        repo: "https://github.com/tmux-plugins/tpm"
+        dest: "{{ ansible_env.HOME }}/.tmux/plugins/tpm"
+        version: master
+
+    - name: Install TPM plugins
+      shell: "{{ ansible_env.HOME }}/.tmux/plugins/tpm/bin/install_plugins"
+      args:
+        executable: /bin/bash
+

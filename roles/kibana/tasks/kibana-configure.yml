@@ -1,0 +1,50 @@
+- name: Configure Kibana settings
+  hosts: kibana
+  become: true
+  vars:
+    elastic_ip: "https://{{ hostvars[groups['loadbalancer'][0]]['inventory_hostname'] }}:9200"
+    token_api_endpoint: "_security/service/elastic/kibana/credential/token/kibana_token"
+    elastic_password: "elastic"
+  tasks:
+    - name: Set multiple config lines
+      ansible.builtin.lineinfile:
+        path: /etc/kibana/kibana.yml
+        regexp: "^#?{{ item.key }}:"
+        line: "{{ item.key }}: {{ item.value }}"
+        backrefs: true
+      loop:
+        - { key: 'server.port', value: '5601' }
+        - { key: 'server.host', value: '0.0.0.0' }
+        - { key: 'server.publicBaseUrl', value: 'https://{{ inventory_hostname }}:5601' }
+        - { key: 'server.ssl.enabled', value: 'true' }
+        - { key: 'server.ssl.certificate', value: '/etc/kibana/certs/instance/instance.crt' }
+        - { key: 'server.ssl.key', value: '/etc/kibana/certs/instance/instance.key' }
+        - { key: 'elasticsearch.ssl.certificateAuthorities', value: '[ "/etc/kibana/certs/http_ca.crt" ]' }
+        - { key: 'elasticsearch.ssl.verificationMode', value: 'certificate' }
+    - name: Elasticsearch host listesini ayarla
+      ansible.builtin.blockinfile:
+        path: /etc/kibana/kibana.yml
+        marker: "# {mark} ANSIBLE MANAGED BLOCK elasticsearch.hosts"
+        block: |
+          elasticsearch.hosts:
+          {% for host in groups['loadbalancer'] %}
+            - https://{{ host }}:9200
+          {% endfor %}
+
+    - name: Install jq
+      apt:
+        name: jq
+        state: present
+        update_cache: true
+      become: true
+
+    - name: Get Kibana service account token
+      shell: >
+        curl -XPOST -k -u elastic:"{{ elastic_password }}" "{{ elastic_ip }}/{{ token_api_endpoint }}" | jq .token.value -r
+      register: kibana_token
+
+    - name: Add token to kibana keystore
+      shell: >
+        echo "{{ kibana_token.stdout }}" | ./kibana-keystore add elasticsearch.serviceAccountToken -x
+      args:
+        chdir: /usr/share/kibana/bin
