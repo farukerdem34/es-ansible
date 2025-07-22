@@ -6,6 +6,11 @@
     elastic_port: "9200"
     elastic_host: "localhost"
   tasks:
+    - name: Start elasticsearch 
+      ansible.builtin.systemd:
+        name: elasticsearch
+        state: started
+        enabled: true
     - name: Reset elastic user password non-interactively
       become: true
       ansible.builtin.shell: |
