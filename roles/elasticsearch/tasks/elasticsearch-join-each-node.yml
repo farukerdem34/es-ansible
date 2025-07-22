@@ -31,3 +31,6 @@
         name: elasticsearch
         state: started
         enabled: true
+    - name: Pause for a sec 
+      ansible.builtin.pause:
+        minutes: 1
