@@ -1,0 +1,37 @@
+- name: Configure Nginx reverse proxy for multiple ports on 127.0.0.1
+  hosts: reverse_proxy_servers
+  become: true
+  vars:
+    services:
+      - path: example.ctf 
+        port: 3001
+      - path: example2.ctf
+        port: 3002
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Create nginx reverse proxy config
+      template:
+        src: templates/nginx-reverse-proxy.conf.j2
+        dest: /etc/nginx/sites-available/reverse_proxy.conf
+
+    - name: Enable config
+      file:
+        src: /etc/nginx/sites-available/reverse_proxy.conf
+        dest: /etc/nginx/sites-enabled/reverse_proxy.conf
+        state: link
+        force: true
+
+    - name: Remove default config if exists
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted
