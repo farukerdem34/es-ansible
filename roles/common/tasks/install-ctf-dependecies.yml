@@ -1,0 +1,16 @@
+- name: Install CTF Dependecies
+  hosts: master:vpn:docker
+  vars:
+    docker_url: "https://get.docker.com"
+    APPLICATION_PASSWORD: "your-app-password-here"
+    EMAIL_ADDRESS: "example@gmail.com"
+  tasks:
+    - name: Install Dependecies
+      apt:
+        update_cache: true
+        name:
+          - wireguard
+    - name: Install Docker 
+      command: curl "{{ docker_url }}" | bash
+
+
