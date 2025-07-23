@@ -24,16 +24,21 @@ resource "hcloud_network_subnet" "subnet" {
 }
 
 locals {
-  servers = [
+  es-servers = [
     { name = "es-node-1", ip = "192.168.122.10" },
     { name = "es-node-2", ip = "192.168.122.11" },
     { name = "es-node-3", ip = "192.168.122.12" },
     { name = "kibana", ip = "192.168.122.13" },
   ]
+  ctf-servers = [
+    { name = "master", ip = "192.168.122.14" },
+    { name = "vpn", ip = "192.168.122.15" },
+    { name = "docker", ip = "192.168.122.16" },
+  ]
 }
 
 resource "hcloud_server" "nodes" {
-  for_each = { for s in local.servers : s.name => s }
+  for_each = { for s in local.es-servers : s.name => s }
 
   name        = each.value.name
   image       = "ubuntu-24.04"
@@ -50,3 +55,20 @@ resource "hcloud_server" "nodes" {
   }
 }
 
+resource "hcloud_server" "nodes" {
+  for_each = { for s in local.ctf-servers : s.name => s }
+
+  name        = each.value.name
+  image       = "ubuntu-24.04"
+  server_type = "cpx11"
+  ssh_keys    = [var.ssh_key]
+  public_net {
+    ipv6_enabled = false
+    ipv4_enabled = true
+
+  }
+  network {
+    network_id = hcloud_network.private_net.id
+    ip         = each.value.ip
+  }
+}
