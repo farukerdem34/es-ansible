@@ -1,0 +1,34 @@
+- name: CTFd Installation
+  hosts: master
+  become: true
+  vars:
+    ctfd_repository: "https://github.com/CTFd/CTFd.git"
+    ctfd_dest: "/opt/ctfd"
+  tasks:
+    - name: Clone CTFd Repository
+      git:
+        repo: "{{ ctfd_repository }}"
+        dest: "{{ ctfd_dest }}"
+        update: true
+
+    - name: Configure CTFd Port 
+      community.general.yedit:
+        src: "{{ ctfd_dest }}/docker-compose.yml"
+        key: "services.ctfd.ports"
+        value: 
+          - "127.0.0.1:8080:8080"
+    - name: Configure CTFd Nginx Port 
+      community.general.yedit:
+        src: "{{ ctfd_dest }}/docker-compose.yml"
+        key: "services.nginx.ports"
+        value: 
+          - "vpn_ip:80:80"
+    - name: Pulling Docker Images
+      command: docker compose pull
+      args:
+        chdir: "{{ ctfd_dest }}"
+
+    - name: Starting CTFd
+      command: docker compose up -d
+      args:
+        chdir: "{{ ctfd_dest }}"
