@@ -1,0 +1,10 @@
+variable "hcloud_token" {
+  type        = string
+  default = "API-KEY"
+}
+
+variable "ssh_key" {
+  type        = string
+  default = "ssh-key-name"
+}
+

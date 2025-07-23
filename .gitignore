@@ -1,1 +1,8 @@
 inventory.ini
+variables.tf
+.terraform*
+.terraform*/
+terraform.tfstate
+terraform.tfstate.backup
+inventory/inventory.ini
+inventory
