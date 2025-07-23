@@ -1,0 +1,11 @@
+- name: Install Bind9
+  hosts: master
+  tasks:
+    - name: Install Packages
+      apt:
+        name:
+          - bind9
+          - bind9utils
+          - bind9-doc
+          - dnsutils
+        state: present
