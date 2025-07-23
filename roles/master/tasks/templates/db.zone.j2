@@ -1,0 +1,12 @@
+$TTL    604800
+@       IN      SOA     ns1.{{ item.name }}. admin.{{ item.name }}. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+
+@       IN      NS      ns1.{{ item.name }}.
+ns1     IN      A       {{ item.ip }}
+@       IN      A       {{ item.ip }}
+

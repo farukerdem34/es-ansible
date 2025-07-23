@@ -1,0 +1,62 @@
+- name: Configure BIND9 for multiple domains
+  hosts: master 
+  become: true
+  vars:
+    domain_zones:
+      - name: example.ctf
+        ip: "{{ hostvars['docker'][0]['vpn_ip'] }}"
+      - name: example2.ctf
+        ip: "{{ hostvars['docker'][0]['vpn_ip'] }}"
+      - name: skydays.ctf
+        ip: "{{ hostvars['master'][0]['vpn_ip'] }}"
+    zone_dir: /etc/bind/zones
+
+  tasks:
+    - name: Ensure zone directory exists
+      file:
+        path: "{{ zone_dir }}"
+        state: directory
+        owner: bind
+        group: bind
+        mode: '0755'
+    
+    - name: Create named.conf
+      template:
+        src: named.conf.j2
+        owner: bind
+        group: bind 
+        mode: '0644'
+
+    - name: Create named.conf.options
+      template:
+        src: named.conf.options.j2
+        owner: bind
+        group: bind 
+        mode: '0644'
+
+    - name: Create zone files for each domain
+      template:
+        src: db.zone.j2
+        dest: "{{ zone_dir }}/db.{{ item.name }}"
+        owner: bind
+        group: bind
+        mode: '0644'
+      loop: "{{ domain_zones }}"
+
+    - name: Configure named.conf.local with zones
+      template:
+        src: named.conf.local.j2
+        dest: /etc/bind/named.conf.local
+        owner: root
+        group: bind
+        mode: '0644'
+
+    - name: Check zone file syntax
+      command: named-checkconf
+      register: zone_check
+      failed_when: zone_check.rc != 0
+
+    - name: Restart BIND9
+      service:
+        name: bind9
+        state: restarted
