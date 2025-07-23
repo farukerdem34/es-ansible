@@ -1,0 +1,31 @@
+- name: Configuring and Starting Wireguard VPN
+  hosts: vpn
+  vars:
+    wireguard_dir: "/opt/wireguard"
+  tasks:
+    - name: Create Wireguard Workdir
+      ansible.builtin.command: mkdir -p "{{ wireguard_dir }}"
+    - name: Configure compose.yml
+      template:
+        src: compose.yml.j2
+        dest: "{{ wireguard_dir }}/compose.yml"
+        owner: root
+        group: root
+    - name: Start Wireguard
+      command: docker compose up -d
+      args:
+        chdir: "{{ wireguard_dir }}"
+    - name: Proxy for CTFd
+      apt:
+        name:
+          - nginx
+        state: present
+    - name: Configure proxy
+      template:
+        src: ctfd.conf.j2
+        dest: /etc/nginx/nginx.conf
+    - name: Reload Nginx
+      systemd:
+        name: nginx
+        state: reloaded
+        enabled: true
