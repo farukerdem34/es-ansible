@@ -1,6 +1,8 @@
 - name: CTFd Installation
   hosts: master
   become: true
+  roles:
+    - kwoodson.yedit
   vars:
     ctfd_repository: "https://github.com/CTFd/CTFd.git"
     ctfd_dest: "/opt/ctfd"
@@ -10,19 +12,20 @@
         repo: "{{ ctfd_repository }}"
         dest: "{{ ctfd_dest }}"
         update: true
+        force: true
 
-    - name: Configure CTFd Port 
-      community.general.yedit:
+    - name: Configure CTFd Port
+      yedit:
         src: "{{ ctfd_dest }}/docker-compose.yml"
         key: "services.ctfd.ports"
-        value: 
+        value:
           - "127.0.0.1:8080:8080"
-    - name: Configure CTFd Nginx Port 
-      community.general.yedit:
+    - name: Configure CTFd Nginx Port
+      yedit:
         src: "{{ ctfd_dest }}/docker-compose.yml"
         key: "services.nginx.ports"
-        value: 
-          - "vpn_ip:80:80"
+        value:
+          - "{{ vpn_ip }}:80:80"
     - name: Pulling Docker Images
       command: docker compose pull
       args:
