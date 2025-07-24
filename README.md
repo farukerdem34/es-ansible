@@ -1,4 +1,6 @@
-# Task Order
+# Tasks
+
+## ELK Task Order
 
 1. elasticsearch-installation.yml
 2. elasticsearch-configure.yml
@@ -11,3 +13,12 @@
 9. kibana-start-service.yml
 10. es-loadbalancer.yml
 11. kibana-reverse-proxy.yml
+
+## CTF Task Order
+
+1. install-ctf-dependecies.yml
+2. vpn-start-vpn-server.yml
+3. master-install-bind9.yml
+4. master-configure-bind9.yml
+5. master-install-ctfd.yml
+6. docker-reverse-proxy.yml
