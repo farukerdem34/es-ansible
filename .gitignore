@@ -5,4 +5,3 @@ variables.tf
 terraform.tfstate
 terraform.tfstate.backup
 inventory/inventory.ini
-inventory
