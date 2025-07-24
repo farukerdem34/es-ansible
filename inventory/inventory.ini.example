@@ -1,0 +1,19 @@
+[elasticsearch_master]
+x.x.x.x node_name=es-node-1
+
+[elasticsearch_nodes]
+x.x.x.x node_name=es-node-2
+x.x.x.x node_name=es-node-3
+
+[kibana]
+x.x.x.x node_name=kibana
+
+[loadbalancer]
+x.x.x.x
+
+[master]
+x.x.x.x vpn_ip=10.0.0.2
+[vpn]
+x.x.x.x vpn_ip=10.0.0.1
+[docker]
+x.x.x.x vpn_ip=10.0.0.3
