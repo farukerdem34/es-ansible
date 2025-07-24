@@ -37,6 +37,7 @@ locals {
   ]
 }
 
+# ELK 
 resource "hcloud_server" "nodes" {
   for_each = { for s in local.es-servers : s.name => s }
 
@@ -55,6 +56,8 @@ resource "hcloud_server" "nodes" {
   }
 }
 
+
+# CTF
 resource "hcloud_server" "nodes" {
   for_each = { for s in local.ctf-servers : s.name => s }
 
