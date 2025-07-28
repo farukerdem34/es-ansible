@@ -1,5 +1,5 @@
 - name: Install Dotfiles and Configure All
-  hosts: elasticsearch_master:elasticsearch_nodes:kibana
+  hosts: testing
   become: true
   vars:
     dotfiles_repository: "https://github.com/farukerdem34/dotfiles"
@@ -26,7 +26,7 @@
       git:
         repo: "{{ dotfiles_repository }}"
         dest: "{{ ansible_env.HOME }}/.dotfiles"
-        version: "{{ dotfiles_branch }}" 
+        version: "{{ dotfiles_branch }}"
         update: true
 
     - name: Backup existing .bashrc (if it exists)
@@ -50,4 +50,5 @@
       shell: "{{ ansible_env.HOME }}/.tmux/plugins/tpm/bin/install_plugins"
       args:
         executable: /bin/bash
-
+      environment:
+        TERM: xterm-256color
