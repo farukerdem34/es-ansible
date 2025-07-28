@@ -40,6 +40,10 @@
         chdir: "{{ ansible_env.HOME }}/.dotfiles"
       command: stow bash tmux zsh starship vimrc --adopt
 
+    - name: Hard Reset Dotfiles
+      args:
+        chdir: "{{ ansible_env.HOME }}/.dotfiles"
+      command: git reset --hard
     - name: Clone TPM (Tmux Plugin Manager)
       git:
         repo: "https://github.com/tmux-plugins/tpm"
