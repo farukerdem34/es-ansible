@@ -30,7 +30,7 @@
         update: true
 
     - name: Backup existing .bashrc (if it exists)
-      shell: rm -f {{ ansible_env.HOME }}/.bashrc
+      command: rm -f {{ ansible_env.HOME }}/.bashrc
       args:
         removes: "{{ ansible_env.HOME }}/.bashrc.bak"
       ignore_errors: true
@@ -51,7 +51,6 @@
         version: master
 
     - name: Install TPM plugins
-      shell: "{{ ansible_env.HOME }}/.tmux/plugins/tpm/bin/install_plugins"
+      command: "{{ ansible_env.HOME }}/.tmux/plugins/tpm/bin/install_plugins"
       args:
         executable: /bin/bash
-
