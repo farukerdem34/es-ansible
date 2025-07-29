@@ -1,0 +1,17 @@
+# ansible-playbook playbook.yml -e '{"team":"sky-sec","question":"skydays2026"}'
+- name: Restart The Question
+  hosts: questions
+  vars:
+    team_name: "{{ team }}"
+    question_name: "{{ question }}"
+    questions_path: "/opt/ctf/"
+  tasks:
+    - name: Down the containers
+      command: podman compose down -v
+      args:
+        chdir: "{{ questions_path }}/{{ team_name }}/{{ question_name }}"
+
+    - name: Up the containers
+      command: podman compose up -d
+      args:
+        chdir: "{{ questions_path }}/{{ team_name }}/{{ question_name }}"
