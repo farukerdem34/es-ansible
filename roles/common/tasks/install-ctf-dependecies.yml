@@ -4,7 +4,11 @@
     - name: Update repository
       ansible.builtin.apt:
         update_cache: true
+    - name: Upgrade Packages
+      apt:
         upgrade: full
+    - name: Install Packages
+      apt:
         name:
           - wireguard
           - ca-certificates
