@@ -38,27 +38,27 @@ locals {
 }
 
 # ELK 
-resource "hcloud_server" "nodes" {
-  for_each = { for s in local.es-servers : s.name => s }
-
-  name        = each.value.name
-  image       = "ubuntu-24.04"
-  server_type = "cpx11"
-  ssh_keys    = [var.ssh_key]
-  public_net {
-    ipv6_enabled = false
-    ipv4_enabled = true
-
-  }
-  network {
-    network_id = hcloud_network.private_net.id
-    ip         = each.value.ip
-  }
-}
+# resource "hcloud_server" "nodes" {
+#   for_each = { for s in local.es-servers : s.name => s }
+#
+#   name        = each.value.name
+#   image       = "ubuntu-24.04"
+#   server_type = "cpx11"
+#   ssh_keys    = [var.ssh_key]
+#   public_net {
+#     ipv6_enabled = false
+#     ipv4_enabled = true
+#
+#   }
+#   network {
+#     network_id = hcloud_network.private_net.id
+#     ip         = each.value.ip
+#   }
+# }
 
 
 # CTF
-resource "hcloud_server" "nodes" {
+resource "hcloud_server" "ctf" {
   for_each = { for s in local.ctf-servers : s.name => s }
 
   name        = each.value.name
