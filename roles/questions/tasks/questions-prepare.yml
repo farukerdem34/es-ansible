@@ -1,0 +1,30 @@
+- name: Prepare CTF Questions & Team Folders
+  vars:
+    teams:
+      - team1
+      - team2
+      - team3
+    templates_src: "/path/to/local/dir"
+    templates_rmt: "templates"
+    ctf_base_dir: "/opt/ctf"
+    soft_link_script_dir: "/opt/create-file-structer.sh"
+  tasks:
+    - name: Create base folders
+      command: mkdir -p "{{ ctf_base_dir }}/{{ templates_rmt }}"
+
+    - name: Create team folders
+      command: mkdir -p "{{ ctf_base_dir }}{{ item }}"
+      loop: "{{ teams }}"
+
+    - name: Copy Questions to Remote
+      copy:
+        src: "{{ templates_src }}"
+        dest: "{{ ctf_base_dir }}/{{ templates_rmt }}"
+
+    - name: Copy soft link script
+      copy:
+        src: templates/create-file-structer.sh
+        dest: "{{ soft_link_script_dir }}"
+
+    - name: Execute soft link script
+      command: bash "{{ soft_link_script_dir }}"
