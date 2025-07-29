@@ -1,0 +1,10 @@
+// Auto-generated zone entries
+{% for team in teams %}
+  {% for question in questions %}
+zone "{{ team }}.{{ question }}.{{ domain_suffix }}" {
+    type master;
+    file "/etc/bind/zones/db.{{ team }}.{{ question }}.{{ domain_suffix }}";
+};
+  {% endfor %}
+{% endfor %}
+

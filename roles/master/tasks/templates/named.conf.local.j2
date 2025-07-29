@@ -1,7 +1,0 @@
-{% for zone in domain_zones %}
-zone "{{ zone.name }}" {
-    type master;
-    file "{{ zone_dir }}/db.{{ zone.name }}";
-};
-{% endfor %}
-

@@ -1,37 +1,37 @@
-- name: Configure Nginx reverse proxy for multiple ports on 127.0.0.1
-  hosts: reverse_proxy_servers
+- name: Generate Nginx reverse proxy configs
+  hosts: questions
   become: true
   vars:
-    services:
-      - path: example.ctf 
-        port: 3001
-      - path: example2.ctf
-        port: 3002
+    teams:
+      - team1
+      - team2
+    questions:
+      - example1
+      - example2
+    domain_suffix: ctf
+    question_ports:
+      example1: 9001
+      example2: 9002
+
   tasks:
-    - name: Install nginx
-      apt:
-        name: nginx
-        state: present
-        update_cache: true
+    - name: Generate Nginx config for each team-question
+      ansible.builtin.template:
+        src: templates/nginx-reverseproxy.conf.j2
+        dest: "/etc/nginx/sites-available/{{ item.0 }}.{{ item.1 }}.{{ domain_suffix }}"
+        mode: "0644"
+      loop: "{{ teams | product(questions) | list }}"
+      vars:
+        backend_port: "{{ question_ports[item.1] }}"
 
-    - name: Create nginx reverse proxy config
-      template:
-        src: templates/nginx-reverse-proxy.conf.j2
-        dest: /etc/nginx/sites-available/reverse_proxy.conf
-
-    - name: Enable config
-      file:
-        src: /etc/nginx/sites-available/reverse_proxy.conf
-        dest: /etc/nginx/sites-enabled/reverse_proxy.conf
+    - name: Enable Nginx sites
+      ansible.builtin.file:
+        src: "/etc/nginx/sites-available/{{ item.0 }}.{{ item.1 }}.{{ domain_suffix }}"
+        dest: "/etc/nginx/sites-enabled/{{ item.0 }}.{{ item.1 }}.{{ domain_suffix }}"
         state: link
         force: true
+      loop: "{{ teams | product(questions) | list }}"
 
-    - name: Remove default config if exists
-      file:
-        path: /etc/nginx/sites-enabled/default
-        state: absent
-
-    - name: Restart nginx
-      service:
+    - name: Reload Nginx
+      systemd:
         name: nginx
         state: restarted
