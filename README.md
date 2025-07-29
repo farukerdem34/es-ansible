@@ -22,3 +22,33 @@
 4. master-configure-bind9.yml
 5. master-install-ctfd.yml
 6. docker-reverse-proxy.yml
+
+### Questions File Structer
+
+```plaintext
+ opt/ctf
+├──  team1
+│   ├──  q1
+│   ├──  q2
+│   └──  q3
+├──  team2
+│   ├──  q1
+│   ├──  q2
+│   └──  q3
+├──  team3
+│   ├──  q1
+│   ├──  q2
+│   └──  q3
+├──  team4
+│   ├──  q1
+│   ├──  q2
+│   └──  q3
+├──  team5
+│   ├──  q1
+│   ├──  q2
+│   └──  q3
+└──  team6
+    ├──  q1
+    ├──  q2
+    └──  q3
+```
