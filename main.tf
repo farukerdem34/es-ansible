@@ -33,7 +33,7 @@ locals {
   ctf-servers = [
     { name = "master", ip = "192.168.122.14" },
     { name = "vpn", ip = "192.168.122.15" },
-    { name = "docker", ip = "192.168.122.16" },
+    { name = "questions", ip = "192.168.122.16" },
   ]
 }
 
