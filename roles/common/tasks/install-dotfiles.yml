@@ -1,20 +1,22 @@
 - name: Install Dotfiles and Configure All
-  hosts: testing
-  become: true
+  hosts: elasticsearch_master:elasticsearch_nodes:kibana
   vars:
     dotfiles_repository: "https://github.com/farukerdem34/dotfiles"
     dotfiles_branch: "master"
   tasks:
     - name: Update package repositories
+      become: true
       apt:
         update_cache: true
 
     - name: Upgrade all packages
+      become: true
       apt:
         upgrade: dist
         autoremove: true
 
     - name: Install dependencies
+      become: true
       apt:
         name:
           - git
